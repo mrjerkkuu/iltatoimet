@@ -1,0 +1,13 @@
+{
+  "appId": "fi.iltatoimet.app",
+  "appName": "Iltatoimet",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Preferences": {
+      "group": "iltatoimet"
+    }
+  }
+}

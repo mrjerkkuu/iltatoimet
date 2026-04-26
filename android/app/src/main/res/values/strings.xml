@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Iltatoimet</string>
+    <string name="title_activity_main">Iltatoimet</string>
+    <string name="package_name">fi.iltatoimet.app</string>
+    <string name="custom_url_scheme">fi.iltatoimet.app</string>
+</resources>

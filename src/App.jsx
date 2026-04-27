@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { App as CapApp } from "@capacitor/app";
 import { sGet, sSet } from "./storage";
 import { DEFAULT_TASKS, STORAGE_KEY, PROGRESS_KEY, TASKS_KEY } from "./constants";
 import { BASE } from "./styles";
@@ -18,6 +19,23 @@ export default function App() {
   const [tasks, setTasks] = useState(DEFAULT_TASKS);
   const [progress, setProgress] = useState({});
   const [activeChild, setActiveChild] = useState(null);
+  const phaseRef = useRef(phase);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+
+  useEffect(() => {
+    const listenerPromise = CapApp.addListener("backButton", () => {
+      const p = phaseRef.current;
+      if (p === "home" || p === "count") {
+        CapApp.exitApp();
+      } else if (p === "child") {
+        setActiveChild(null);
+        setPhase("home");
+      } else if (p === "editChildren" || p === "editTasks") {
+        setPhase("home");
+      }
+    });
+    return () => { listenerPromise.then(h => h.remove()); };
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -57,6 +75,12 @@ export default function App() {
   async function handleEditChildrenDone(kids) {
     setChildren(kids);
     await sSet(STORAGE_KEY, kids);
+    const keptIds = new Set(kids.map(c => c.id));
+    const cleanedProgress = Object.fromEntries(
+      Object.entries(progress).filter(([id]) => keptIds.has(Number(id)))
+    );
+    setProgress(cleanedProgress);
+    await sSet(PROGRESS_KEY, cleanedProgress);
     setPhase("home");
   }
 

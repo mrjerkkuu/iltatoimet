@@ -1,16 +1,55 @@
-# React + Vite
+# Iltatoimet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Android-sovellus lasten iltatoimien seurantaan. Jokainen lapsi näkee oman eläinhahmonsa, joka täyttyy sitä mukaa kun iltatoimet tulevat tehdyiksi.
 
-Currently, two official plugins are available:
+## Ominaisuudet
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Usean lapsen tuki — jokaisella oma hahmo, väri ja eläin
+- Räätälöitävät iltatoimitehtävät järjestyksessä
+- Eläinhahmo täyttyy edistymisen myötä ja laukaisee konfetit kun kaikki on tehty
+- Edistyminen tallentuu automaattisesti puhelimeen
+- Toimii myös selaimessa (PWA)
 
-## React Compiler
+## Käyttö
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Ensimmäinen käynnistys**
+1. Valitse lasten lukumäärä
+2. Anna jokaiselle lapselle nimi, eläin ja väri
+3. Muokkaa iltatoimilista haluamaksesi (tai jätä oletukset)
 
-## Expanding the ESLint configuration
+**Iltatoimet**
+- Napauta lapsen korttia etusivulla
+- Ruksi tehtävät sitä mukaa kuin ne tehdään — eläinhahmo täyttyy
+- Kun kaikki on tehty, tulee konfettisuihku
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Asetukset (etusivun hampurilaisvalikko)**
+- Muokkaa lapsia — lisää, poista tai muuta nimen/eläimen/värin
+- Muokkaa tehtäviä — lisää, poista tai järjestä tehtäviä uudelleen
+- Tyhjennä edistyminen — nollaa kaikki tänä iltana tehdyt
+
+## Kehitys
+
+```bash
+npm install
+npm run dev          # Dev-palvelin osoitteessa localhost:5173
+npm run build        # Tuotantobuild → dist/
+npm run lint         # ESLint
+npm run cap:sync     # Build + synkkaa web-tiedostot Androidille
+npm run cap:android  # Avaa Android Studio
+```
+
+Debug-APK:n buildaaminen `cap:sync`-ajon jälkeen:
+
+```bash
+cd android && ./gradlew assembleDebug
+# APK → android/app/build/outputs/apk/debug/app-debug.apk
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Teknologia
+
+- React 19 + Vite 8
+- Capacitor 8 (Android-paketointi)
+- Capacitor Preferences (tallennus)
+- Web Audio API (äänet)
+- Ei TypeScriptiä, ei ulkoisia UI-kirjastoja

@@ -21,10 +21,17 @@ export default function App() {
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
+  // Push a hash URL when entering deep views so back button navigates
+  // within the app (/#child → /) instead of potentially leaving it
   useEffect(() => {
-    window.history.pushState(null, "");
+    const deepPhases = ["child", "editChildren", "editTasks", "naming", "tasks"];
+    if (deepPhases.includes(phase)) {
+      window.history.pushState({ phase }, "", "#" + phase);
+    }
+  }, [phase]);
+
+  useEffect(() => {
     const handlePopState = () => {
-      window.history.pushState(null, "");
       switch (phaseRef.current) {
         case "child":
           setActiveChild(null);
@@ -40,6 +47,9 @@ export default function App() {
         case "tasks":
           setPhase("naming");
           break;
+        default:
+          // home/count: estä sovelluksen sulkeutuminen
+          window.history.pushState(null, "", window.location.pathname);
       }
     };
     window.addEventListener("popstate", handlePopState);

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { App as CapApp } from "@capacitor/app";
 import { sGet, sSet } from "./storage";
 import { DEFAULT_TASKS, STORAGE_KEY, PROGRESS_KEY, TASKS_KEY } from "./constants";
 import { BASE } from "./styles";
@@ -20,21 +19,31 @@ export default function App() {
   const [progress, setProgress] = useState({});
   const [activeChild, setActiveChild] = useState(null);
   const phaseRef = useRef(phase);
-  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  phaseRef.current = phase;
 
   useEffect(() => {
-    const listenerPromise = CapApp.addListener("backButton", () => {
-      const p = phaseRef.current;
-      if (p === "home" || p === "count") {
-        CapApp.exitApp();
-      } else if (p === "child") {
-        setActiveChild(null);
-        setPhase("home");
-      } else if (p === "editChildren" || p === "editTasks") {
-        setPhase("home");
+    window.history.pushState(null, "");
+    const handlePopState = () => {
+      window.history.pushState(null, "");
+      switch (phaseRef.current) {
+        case "child":
+          setActiveChild(null);
+          setPhase("home");
+          break;
+        case "editChildren":
+        case "editTasks":
+          setPhase("home");
+          break;
+        case "naming":
+          setPhase("count");
+          break;
+        case "tasks":
+          setPhase("naming");
+          break;
       }
-    });
-    return () => { listenerPromise.then(h => h.remove()); };
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   useEffect(() => {

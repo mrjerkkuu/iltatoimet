@@ -1,13 +1,21 @@
 import { useState, useRef } from "react";
 import AnimalSVG from "../components/AnimalSVG";
 import ChildForm from "../components/ChildForm";
-import { ANIMAL_OPTIONS } from "../constants";
+import { ANIMAL_OPTIONS, PALETTE } from "../constants";
 import { S } from "../styles";
 
 export default function ChildEditor({ initialChildren, onDone, onBack }) {
   const [children, setChildren] = useState(initialChildren.map(c => ({ ...c })));
   const [editIdx, setEditIdx] = useState(null);
   const inputRef = useRef(null);
+
+  function addChild() {
+    const newId = children.length > 0 ? Math.max(...children.map(c => c.id)) + 1 : 1;
+    const newChild = { id: newId, name: "", animal: "cat", color: PALETTE[0].color, accent: PALETTE[0].accent };
+    setChildren(prev => [...prev, newChild]);
+    setEditIdx(children.length);
+    setTimeout(() => inputRef.current?.focus(), 80);
+  }
 
   if (editIdx === null) return (
     <div style={S.screen}>
@@ -38,7 +46,14 @@ export default function ChildEditor({ initialChildren, onDone, onBack }) {
             </button>
           ))}
         </div>
-        <button onClick={() => onDone(children)} style={{ ...S.bigBtn, marginTop:20, background:"linear-gradient(135deg,#86efac,#22c55e)" }}>
+        <button onClick={addChild} style={{
+          ...S.bigBtn, marginTop:14,
+          background:"linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))",
+          border:"2px dashed rgba(255,255,255,0.2)",
+        }}>
+          + Lisää lapsi
+        </button>
+        <button onClick={() => onDone(children)} style={{ ...S.bigBtn, marginTop:10, background:"linear-gradient(135deg,#86efac,#22c55e)" }}>
           ✓ Tallenna muutokset
         </button>
       </div>
@@ -46,6 +61,8 @@ export default function ChildEditor({ initialChildren, onDone, onBack }) {
   );
 
   const child = children[editIdx];
+  const isNew = editIdx >= initialChildren.length;
+
   function update(field, val) {
     setChildren(prev => prev.map((c, i) => i === editIdx ? { ...c, [field]: val } : c));
   }
@@ -55,7 +72,15 @@ export default function ChildEditor({ initialChildren, onDone, onBack }) {
     setEditIdx(null);
   }
   function cancelEdit() {
-    setChildren(prev => prev.map((c, i) => i === editIdx ? { ...initialChildren[editIdx] } : c));
+    if (isNew) {
+      setChildren(prev => prev.filter((_, i) => i !== editIdx));
+    } else {
+      setChildren(prev => prev.map((c, i) => i === editIdx ? { ...initialChildren[editIdx] } : c));
+    }
+    setEditIdx(null);
+  }
+  function removeChild() {
+    setChildren(prev => prev.filter((_, i) => i !== editIdx));
     setEditIdx(null);
   }
 
@@ -65,7 +90,7 @@ export default function ChildEditor({ initialChildren, onDone, onBack }) {
         <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
           <button onClick={cancelEdit} style={S.backBtn}>←</button>
           <div>
-            <h2 style={{ ...S.title, fontSize:20, margin:0 }}>Muokkaa lasta</h2>
+            <h2 style={{ ...S.title, fontSize:20, margin:0 }}>{isNew ? "Uusi lapsi" : "Muokkaa lasta"}</h2>
             <p style={{ color:"rgba(255,255,255,0.4)", fontSize:12, margin:0 }}>{editIdx + 1} / {children.length}</p>
           </div>
         </div>
@@ -75,9 +100,15 @@ export default function ChildEditor({ initialChildren, onDone, onBack }) {
           background: child.name.trim() ? `linear-gradient(135deg,${child.color},${child.accent})` : "rgba(255,255,255,0.1)",
           opacity: child.name.trim() ? 1 : 0.5,
         }}>✓ Tallenna</button>
+        {!isNew && children.length > 1 && (
+          <button onClick={removeChild} style={{
+            background:"transparent", border:"none", color:"rgba(255,100,100,0.6)",
+            cursor:"pointer", fontSize:13, width:"100%", marginTop:10, fontFamily:"'Nunito',sans-serif",
+          }}>Poista lapsi</button>
+        )}
         <button onClick={cancelEdit} style={{
           background:"transparent", border:"none", color:"rgba(255,255,255,0.3)",
-          cursor:"pointer", fontSize:13, width:"100%", marginTop:10, fontFamily:"'Nunito',sans-serif",
+          cursor:"pointer", fontSize:13, width:"100%", marginTop:6, fontFamily:"'Nunito',sans-serif",
         }}>Peruuta muutokset</button>
       </div>
     </div>
